@@ -1,5 +1,6 @@
 #include <pebble.h>
-
+#include <stringtok.h>
+	
 #define KEY_BUTTON    0
 	
 #define KEY_VIBRATE   1
@@ -17,7 +18,7 @@
 	
 #define NUM_MENU_SECTIONS  1
 #define DECKS  5
-#define DECK_MENU_SIZE  3     
+#define DECK_MENU_SIZE  10
   
 static Window *s_main_window;
 static TextLayer *s_text_layer;
@@ -35,39 +36,43 @@ static void menu_select_callback(int index, void *ctx) {
 
 /******************************* Build menu **********************************/
 
-static void build_menu(char *menu_str, Window *window) {
-  char *menu_items = strtok(menu_str, ";");
+static void build_menu(Window *window, char *menu_str, int len) {
+  char buf[127]; // edit to fit maximum length of received string
+  strncpy(buf, menu_str, len);
+  
+  char *menu_items = stringtok(buf, ";");
   
   s_menu_icon_image = gbitmap_create_with_resource(RESOURCE_ID_INDEX_CARD);
-  int menu_items_count = 0;
-  /*while (menu_items != NULL && menu_items_count < DECK_MENU_SIZE) {
-    s_first_menu_items[menu_items_count++] = (SimpleMenuItem) {
+	
+  while (menu_items != NULL && num_menu_items < DECK_MENU_SIZE) {
+    s_first_menu_items[num_menu_items++] = (SimpleMenuItem) {
       .title = menu_items,
       .callback = menu_select_callback,
       .icon = s_menu_icon_image,
     };
-  	menu_items = strtok(NULL, ";");
-  }*/
-  s_first_menu_items[menu_items_count++] = (SimpleMenuItem) {
+  	menu_items = stringtok(NULL, ";");
+  }
+  /*s_first_menu_items[num_menu_items++] = (SimpleMenuItem) {
       .title = "CS",
       .callback = menu_select_callback,
       .icon = s_menu_icon_image,
   };
-  s_first_menu_items[menu_items_count++] = (SimpleMenuItem) {
+  s_first_menu_items[num_menu_items++] = (SimpleMenuItem) {
       .title = "Math",
       .callback = menu_select_callback,
       .icon = s_menu_icon_image,
   };
-  s_first_menu_items[menu_items_count++] = (SimpleMenuItem) {
+  s_first_menu_items[num_menu_items++] = (SimpleMenuItem) {
       .title = "Physics",
       .callback = menu_select_callback,
       .icon = s_menu_icon_image,
-  };
+  };*/
   s_menu_sections[0] = (SimpleMenuSection) {
     .num_items = num_menu_items,
     .items = s_first_menu_items,
   };
   Layer *window_layer = window_get_root_layer(window);
+  layer_remove_child_layers(window_layer);
   GRect bounds = layer_get_frame(window_layer);
   s_simple_menu_layer = simple_menu_layer_create(bounds, window, s_menu_sections, NUM_MENU_SECTIONS, NULL);
   layer_add_child(window_layer, simple_menu_layer_get_layer(s_simple_menu_layer));
@@ -92,8 +97,8 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
     switch(t->key) {
       case KEY_DECKS:
         // Build menu
-        text_layer_set_text(s_text_layer, t->value->cstring);        
-        build_menu(t->value->cstring, s_main_window);
+        text_layer_set_text(s_text_layer, t->value->cstring);
+        build_menu(s_main_window, t->value->cstring, t->length);
         break;
       case KEY_VIBRATE:
         // Trigger vibration
