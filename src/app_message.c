@@ -44,7 +44,7 @@ static void push_menu(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_frame(window_layer);
   s_simple_menu_layer = simple_menu_layer_create(bounds, window, s_menu_sections, NUM_MENU_SECTIONS, NULL);
-  layer_add_child(window_get_root_layer(window), simple_menu_layer_get_layer(s_simple_menu_layer));
+  layer_add_child(window_layer, simple_menu_layer_get_layer(s_simple_menu_layer));
 }
 
 static void build_menu(char *menu_str) {
