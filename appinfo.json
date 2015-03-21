@@ -1,0 +1,19 @@
+{
+  "uuid": "74460383-8a0f-4bb6-971f-8937c2ed4441",
+  "shortName": "Anki",
+  "longName": "Anki",
+  "companyName": "CoRE HackBU Project",
+  "versionCode": 2,
+  "versionLabel": "2.0",
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "KEY_DATA": 5
+  },
+  "targetPlatforms": [
+    "aplite",
+    "basalt"
+  ],
+  "sdkVersion": "3"
+}
