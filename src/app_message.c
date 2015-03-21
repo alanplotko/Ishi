@@ -17,7 +17,7 @@
 	
 #define NUM_MENU_SECTIONS  1
 #define DECKS  5
-#define DECK_MENU_SIZE  10           
+#define DECK_MENU_SIZE  3     
   
 static Window *s_main_window;
 static TextLayer *s_text_layer;
@@ -35,19 +35,7 @@ static void menu_select_callback(int index, void *ctx) {
 
 /******************************* Build menu **********************************/
 
-static void push_menu(Window *window) {
-  s_menu_sections[0] = (SimpleMenuSection) {
-    .num_items = num_menu_items,
-    .items = s_first_menu_items,
-  };
-
-  Layer *window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_frame(window_layer);
-  s_simple_menu_layer = simple_menu_layer_create(bounds, window, s_menu_sections, NUM_MENU_SECTIONS, NULL);
-  layer_add_child(window_layer, simple_menu_layer_get_layer(s_simple_menu_layer));
-}
-
-static void build_menu(char *menu_str) {
+static void build_menu(char *menu_str, Window *window) {
   char *menu_items = strtok(menu_str, ";");
   
   s_menu_icon_image = gbitmap_create_with_resource(RESOURCE_ID_INDEX_CARD);
@@ -75,7 +63,14 @@ static void build_menu(char *menu_str) {
       .callback = menu_select_callback,
       .icon = s_menu_icon_image,
   };
-  push_menu(s_main_window);
+  s_menu_sections[0] = (SimpleMenuSection) {
+    .num_items = num_menu_items,
+    .items = s_first_menu_items,
+  };
+  Layer *window_layer = window_get_root_layer(window);
+  GRect bounds = layer_get_frame(window_layer);
+  s_simple_menu_layer = simple_menu_layer_create(bounds, window, s_menu_sections, NUM_MENU_SECTIONS, NULL);
+  layer_add_child(window_layer, simple_menu_layer_get_layer(s_simple_menu_layer));
 }
 
 /******************************* AppMessage ***********************************/
@@ -98,7 +93,7 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
       case KEY_DECKS:
         // Build menu
         text_layer_set_text(s_text_layer, t->value->cstring);        
-        build_menu(t->value->cstring);
+        build_menu(t->value->cstring, s_main_window);
         break;
       case KEY_VIBRATE:
         // Trigger vibration
