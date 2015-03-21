@@ -1,23 +1,34 @@
 #include <pebble.h>
 
 #define KEY_BUTTON    0
+	
 #define KEY_VIBRATE   1
-#define KEY_ACTION    2
-  
-#define STAGE_ANS     0
-#define STAGE_EASE    1
-#define STAGE_QTN     2
-#define STAGE_DECK    3
+	
+#define KEY_ACTION     2
+#define ACTION_ANS     0
+#define ACTION_EASE    1
+#define ACTION_Q       2
+#define ACTION_DECK_SELECT    3
 
+#define KEY_DECKS 3
+
+#define KEY_QUESTION 4
+
+#define KEY_ANSWER 5
+
+#define KEY_EASE 6
+	
 #define NUM_MENU_SECTIONS  1
 
 #define DECKS      5
   
 #define DECK_MENU_SIZE 10
+
+            
   
 static Window *s_main_window;
 static TextLayer *s_text_layer;
-static unsigned int stage = STAGE_DECK;
+static unsigned int stage = ACTION_DECK_SELECT;
 
 static SimpleMenuLayer *s_simple_menu_layer;
 static SimpleMenuSection s_menu_sections[NUM_MENU_SECTIONS];
@@ -77,7 +88,7 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
   while(t != NULL) {
     // Process this pair's key
     switch(t->key) {
-      case DECKS:
+      case KEY_DECKS:
         // Build menu
         build_menu(t);
         break;
@@ -112,34 +123,34 @@ static void outbox_sent_handler(DictionaryIterator *iterator, void *context) {
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   switch(stage) {
-    case STAGE_DECK:
+    case ACTION_DECK_SELECT:
       break;
-    case STAGE_QTN:
+    case ACTION_Q:
       text_layer_set_text(s_text_layer, "Stage: Answer");
-      stage = STAGE_ANS;
-      send(KEY_ACTION, STAGE_ANS);
+      stage = ACTION_ANS;
+      send(KEY_ACTION, ACTION_ANS);
       break;
-    case STAGE_ANS:
+    case ACTION_ANS:
       text_layer_set_text(s_text_layer, "Stage: Results");
-      stage = STAGE_EASE;
-      send(KEY_ACTION, STAGE_EASE);
+      stage = ACTION_EASE;
+      send(KEY_ACTION, ACTION_EASE);
       break;
-    case STAGE_EASE:
+    case ACTION_EASE:
       text_layer_set_text(s_text_layer, "Stage: Question");
-      stage = STAGE_QTN;
-      send(KEY_ACTION, STAGE_QTN);
+      stage = ACTION_Q;
+      send(KEY_ACTION, ACTION_Q);
       break;
   }
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if(stage != STAGE_DECK) {
+  if(stage != ACTION_DECK_SELECT) {
     text_layer_set_text(s_text_layer, "Clicked up");
   }
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if(stage != STAGE_DECK) {
+  if(stage != ACTION_DECK_SELECT) {
     text_layer_set_text(s_text_layer, "Clicked down");
   }
 }
@@ -190,7 +201,7 @@ static void init(void) {
   window_stack_push(s_main_window, true);
   
   // Ask Android app for decks
-  send(KEY_ACTION, STAGE_DECK);
+  send(KEY_ACTION, ACTION_DECK_SELECT);
 }
 
 static void deinit(void) {
