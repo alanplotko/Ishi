@@ -2,10 +2,15 @@
 
 #define KEY_BUTTON    0
 #define KEY_VIBRATE   1
+#define KEY_ACTION    2
 
 #define BUTTON_UP     0
 #define BUTTON_SELECT 1
 #define BUTTON_DOWN   2
+
+#define ACTION_ANS      0
+#define ACTION_OPTS   1
+#define ACTION_Q      2
 
 static Window *s_main_window;
 static TextLayer *s_text_layer;
