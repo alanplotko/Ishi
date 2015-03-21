@@ -47,14 +47,13 @@ static void push_menu(Window *window) {
   layer_add_child(window_get_root_layer(window), simple_menu_layer_get_layer(s_simple_menu_layer));
 }
 
-static void build_menu(Tuple *t) {
-  char *buffer = t->value->cstring;
-  char *menu_items = strtok(buffer, ";");
+static void build_menu(char *menu_str) {
+  char *menu_items = strtok(menu_str, ";");
   
   s_menu_icon_image = gbitmap_create_with_resource(RESOURCE_ID_INDEX_CARD);
-  
-  while (menu_items != NULL && num_menu_items < DECK_MENU_SIZE) {
-    s_first_menu_items[num_menu_items++] = (SimpleMenuItem) {
+  int menu_items_count = 0;
+  while (menu_items != NULL && menu_items_count < DECK_MENU_SIZE) {
+    s_first_menu_items[menu_items_count++] = (SimpleMenuItem) {
       .title = menu_items,
       .callback = menu_select_callback,
       .icon = s_menu_icon_image,
@@ -84,7 +83,7 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
       case KEY_DECKS:
         // Build menu
         text_layer_set_text(s_text_layer, t->value->cstring);        
-        build_menu(t);
+        build_menu(t->value->cstring);
         break;
       case KEY_VIBRATE:
         // Trigger vibration
