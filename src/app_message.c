@@ -8,7 +8,7 @@
 #define BUTTON_SELECT 1
 #define BUTTON_DOWN   2
 
-#define ACTION_ANS      0
+#define ACTION_ANS    0
 #define ACTION_OPTS   1
 #define ACTION_Q      2
 
