@@ -2,8 +2,7 @@
 #define _STRTOK_H
 	
 char *
-stringtok(register char *s,
-	register const char *delim);
+stringtok(register char *s,register const char *delim);
 	
 
 #endif

@@ -36,21 +36,33 @@ static void menu_select_callback(int index, void *ctx) {
 
 /******************************* Build menu **********************************/
 
-static void build_menu(Window *window, char *menu_str, int len) {
-  char buf[127]; // edit to fit maximum length of received string
-  strncpy(buf, menu_str, len);
-  
-  char *menu_items = stringtok(buf, ";");
+static void build_menu(Window *window, char *menu_str, int len) {  
+  char *start = menu_str;
+  char *end = menu_str;
+  int substr_len = 0;
+  int total = 0;
   
   s_menu_icon_image = gbitmap_create_with_resource(RESOURCE_ID_INDEX_CARD);
 	
-  while (menu_items != NULL && num_menu_items < DECK_MENU_SIZE) {
+  while (*start != '\0' && total < len - 1 && num_menu_items < DECK_MENU_SIZE) {
+	while (*end != ';')
+	{
+		end++;
+		substr_len++;
+	}
+	char *buf = malloc(substr_len + 1);
+	memcpy(buf, start, substr_len);
+	buf[substr_len] = '\0';
     s_first_menu_items[num_menu_items++] = (SimpleMenuItem) {
-      .title = menu_items,
+      .title = buf,
       .callback = menu_select_callback,
       .icon = s_menu_icon_image,
     };
-  	menu_items = stringtok(NULL, ";");
+	//free(buf);
+	end++;
+  	start = end;
+	total += substr_len + 1;
+	substr_len = 0;
   }
   /*s_first_menu_items[num_menu_items++] = (SimpleMenuItem) {
       .title = "CS",
