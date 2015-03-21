@@ -1,8 +1,5 @@
 {
-    "appKeys": {
-        "KEY_BUTTON": 0,
-        "KEY_VIBRATE": 1
-    },
+    "appKeys": {},
     "capabilities": [
         ""
     ],

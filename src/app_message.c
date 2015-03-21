@@ -3,21 +3,21 @@
 #define KEY_BUTTON    0
 #define KEY_VIBRATE   1
 #define KEY_ACTION    2
-#define BUTTON_UP     0
-#define BUTTON_SELECT 1
-#define BUTTON_DOWN   2
+  
+#define STAGE_ANS     0
+#define STAGE_RES     1
+#define STAGE_QTN     2
 
 static Window *s_main_window;
 static TextLayer *s_text_layer;
+static unsigned int stage = STAGE_QTN;
 
 /******************************* AppMessage ***********************************/
 
 static void send(int key, int message) {
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
-
   dict_write_int(iter, key, &message, sizeof(int), true);
-
   app_message_outbox_send();
 }
 
@@ -59,21 +59,31 @@ static void outbox_sent_handler(DictionaryIterator *iterator, void *context) {
 /********************************* Buttons ************************************/
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(s_text_layer, "Select");
-
-  send(KEY_BUTTON, BUTTON_SELECT);
+  switch(stage) {
+    case STAGE_QTN:
+      text_layer_set_text(s_text_layer, "Stage: Answer");
+      stage = STAGE_ANS;
+      send(KEY_ACTION, STAGE_ANS);
+      break;
+    case STAGE_ANS:
+      text_layer_set_text(s_text_layer, "Stage: Results");
+      stage = STAGE_RES;
+      send(KEY_ACTION, STAGE_RES);
+      break;
+    case STAGE_RES:
+      text_layer_set_text(s_text_layer, "Stage: Question");
+      stage = STAGE_QTN;
+      send(KEY_ACTION, STAGE_QTN);
+      break;
+  }
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(s_text_layer, "Up");
-
-  send(KEY_BUTTON, BUTTON_UP);
+  text_layer_set_text(s_text_layer, "Clicked up");
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(s_text_layer, "Down");
-
-  send(KEY_BUTTON, BUTTON_DOWN);
+  text_layer_set_text(s_text_layer, "Clicked down");
 }
 
 static void click_config_provider(void *context) {
@@ -88,8 +98,8 @@ static void click_config_provider(void *context) {
 static void main_window_load(Window *window) {
   // Create main TextLayer
   s_text_layer = text_layer_create(GRect(0, 0, 144, 168));
-  text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
-  text_layer_set_text(s_text_layer, "Open Android app and press any button.");
+  text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_text(s_text_layer, "Stage: Question");
   text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_layer));
 }
