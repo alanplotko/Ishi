@@ -5,15 +5,13 @@
 #define KEY_ACTION    2
   
 #define STAGE_ANS     0
-#define STAGE_RES     1
+#define STAGE_EASE    1
 #define STAGE_QTN     2
 #define STAGE_DECK    3
 
 #define NUM_MENU_SECTIONS  1
-  
-#define DECK_SIZE  4
+
 #define DECKS      5
-#define DECK_END   6
   
 #define DECK_MENU_SIZE 10
   
@@ -33,22 +31,6 @@ static void menu_select_callback(int index, void *ctx) {
 
 /******************************* Build menu **********************************/
 
-static void build_menu(Tuple *t) {
-  char *buffer = t->value->cstring;
-  char *menu_items = strtok(buffer, ";");
-  
-  s_menu_icon_image = gbitmap_create_with_resource(RESOURCE_ID_INDEX_CARD);
-  
-  while (menu_items != NULL && num_menu_items < DECK_SIZE) {
-    s_first_menu_items[num_menu_items++] = (SimpleMenuItem) {
-      .title = menu_items,
-      .callback = menu_select_callback,
-      .icon = s_menu_icon_image,
-    };
-  	menu_items = strtok(NULL, ";");
-  }
-}
-
 static void push_menu(Window *window) {
   s_menu_sections[0] = (SimpleMenuSection) {
     .num_items = num_menu_items,
@@ -59,6 +41,23 @@ static void push_menu(Window *window) {
   GRect bounds = layer_get_frame(window_layer);
   s_simple_menu_layer = simple_menu_layer_create(bounds, window, s_menu_sections, NUM_MENU_SECTIONS, NULL);
   layer_add_child(window_get_root_layer(window), simple_menu_layer_get_layer(s_simple_menu_layer));
+}
+
+static void build_menu(Tuple *t) {
+  char *buffer = t->value->cstring;
+  char *menu_items = strtok(buffer, ";");
+  
+  s_menu_icon_image = gbitmap_create_with_resource(RESOURCE_ID_INDEX_CARD);
+  
+  while (menu_items != NULL && num_menu_items < DECK_MENU_SIZE) {
+    s_first_menu_items[num_menu_items++] = (SimpleMenuItem) {
+      .title = menu_items,
+      .callback = menu_select_callback,
+      .icon = s_menu_icon_image,
+    };
+  	menu_items = strtok(NULL, ";");
+  }
+  push_menu(s_main_window);
 }
 
 /******************************* AppMessage ***********************************/
@@ -81,9 +80,6 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
       case DECKS:
         // Build menu
         build_menu(t);
-        break;
-      case DECK_END:
-        push_menu(s_main_window);
         break;
       case KEY_VIBRATE:
         // Trigger vibration
@@ -125,10 +121,10 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
       break;
     case STAGE_ANS:
       text_layer_set_text(s_text_layer, "Stage: Results");
-      stage = STAGE_RES;
-      send(KEY_ACTION, STAGE_RES);
+      stage = STAGE_EASE;
+      send(KEY_ACTION, STAGE_EASE);
       break;
-    case STAGE_RES:
+    case STAGE_EASE:
       text_layer_set_text(s_text_layer, "Stage: Question");
       stage = STAGE_QTN;
       send(KEY_ACTION, STAGE_QTN);
