@@ -8,9 +8,22 @@
 #define STAGE_RES     1
 #define STAGE_QTN     2
 
+#define NUM_MENU_SECTIONS     2
+#define NUM_FIRST_MENU_ITEMS  3
+#define NUM_SECOND_MENU_ITEMS 1
+  
 static Window *s_main_window;
 static TextLayer *s_text_layer;
 static unsigned int stage = STAGE_QTN;
+
+static SimpleMenuLayer *s_simple_menu_layer;
+static SimpleMenuSection s_menu_sections[NUM_MENU_SECTIONS];
+static SimpleMenuItem s_first_menu_items[NUM_FIRST_MENU_ITEMS];
+static GBitmap *s_menu_icon_image;
+
+static void menu_select_callback(int index, void *ctx) {
+  layer_mark_dirty(simple_menu_layer_get_layer(s_simple_menu_layer));
+}
 
 /******************************* AppMessage ***********************************/
 
@@ -97,16 +110,51 @@ static void click_config_provider(void *context) {
 
 static void main_window_load(Window *window) {
   // Create main TextLayer
-  s_text_layer = text_layer_create(GRect(0, 0, 144, 168));
-  text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-  text_layer_set_text(s_text_layer, "Stage: Question");
-  text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_layer));
+  //s_text_layer = text_layer_create(GRect(0, 0, 144, 168));
+  //text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  //text_layer_set_text(s_text_layer, "Stage: Question");
+  //text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
+  
+  s_menu_icon_image = gbitmap_create_with_resource(RESOURCE_ID_INDEX_CARD);
+  int num_a_items = 0;
+  
+  s_first_menu_items[num_a_items++] = (SimpleMenuItem) {
+    .title = "Computer Science",
+    .subtitle = "CS 240 Midterm #1",
+    .callback = menu_select_callback,
+    .icon = s_menu_icon_image,
+  };
+  
+  s_first_menu_items[num_a_items++] = (SimpleMenuItem) {
+    .title = "Mathematics",
+    .subtitle = "MATH 330 Exam #2",
+    .callback = menu_select_callback,
+    .icon = s_menu_icon_image,
+  };
+  
+  s_first_menu_items[num_a_items++] = (SimpleMenuItem) {
+    .title = "Physics",
+    .subtitle = "PHYS 132 Final",
+    .callback = menu_select_callback,
+    .icon = s_menu_icon_image,
+  };
+
+  s_menu_sections[0] = (SimpleMenuSection) {
+    .num_items = NUM_FIRST_MENU_ITEMS,
+    .items = s_first_menu_items,
+  };
+  
+  Layer *window_layer = window_get_root_layer(window);
+  GRect bounds = layer_get_frame(window_layer);
+  s_simple_menu_layer = simple_menu_layer_create(bounds, window, s_menu_sections, NUM_MENU_SECTIONS, NULL);
+  layer_add_child(window_get_root_layer(window), simple_menu_layer_get_layer(s_simple_menu_layer));
 }
 
 static void main_window_unload(Window *window) {
   // Destroy main TextLayer
-  text_layer_destroy(s_text_layer);
+  //text_layer_destroy(s_text_layer);
+  simple_menu_layer_destroy(s_simple_menu_layer);
+  gbitmap_destroy(s_menu_icon_image);
 }
 
 static void init(void) {
