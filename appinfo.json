@@ -1,23 +1,27 @@
 {
-  "uuid": "6c0bbc11-7214-4e08-9b45-806b5f1a07a4",
-  "shortName": "Anki",
-  "longName": "Anki",
-  "companyName": "CoRE HackBU Project",
-  "versionCode": 2,
-  "versionLabel": "2.0",
-  "watchapp": {
-    "watchface": false
-  },
-  "appKeys": {
-    "KEY_BUTTON": 0,
-    "KEY_VIBRATE": 1
-  },
-  "resources": {
-    "media": []
-  },
-  "targetPlatforms": [
-    "aplite",
-    "basalt"
-  ],
-  "sdkVersion": "3"
+    "appKeys": {
+        "KEY_BUTTON": 0,
+        "KEY_VIBRATE": 1
+    },
+    "capabilities": [
+        ""
+    ],
+    "companyName": "CoRE HackBU Project",
+    "longName": "Anki",
+    "projectType": "native",
+    "resources": {
+        "media": []
+    },
+    "sdkVersion": "3",
+    "shortName": "Anki",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
+    "uuid": "6c0bbc11-7214-4e08-9b45-806b5f1a07a4",
+    "versionCode": 2,
+    "versionLabel": "2.0",
+    "watchapp": {
+        "watchface": false
+    }
 }
