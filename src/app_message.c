@@ -11,20 +11,13 @@
 #define ACTION_DECK_SELECT    3
 
 #define KEY_DECKS 3
-
 #define KEY_QUESTION 4
-
 #define KEY_ANSWER 5
-
 #define KEY_EASE 6
 	
 #define NUM_MENU_SECTIONS  1
-
-#define DECKS      5
-  
-#define DECK_MENU_SIZE 10
-
-            
+#define DECKS  5
+#define DECK_MENU_SIZE  10           
   
 static Window *s_main_window;
 static TextLayer *s_text_layer;
@@ -90,6 +83,7 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
     switch(t->key) {
       case KEY_DECKS:
         // Build menu
+        text_layer_set_text(s_text_layer, t->value->cstring);        
         build_menu(t);
         break;
       case KEY_VIBRATE:
