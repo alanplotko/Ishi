@@ -149,6 +149,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   switch(stage) {
     case ACTION_DECK_SELECT:
       sendDeckName(KEY_DECKS, s_first_menu_items[simple_menu_layer_get_selected_index(s_simple_menu_layer)].title);
+      APP_LOG(APP_LOG_LEVEL_INFO, s_first_menu_items[simple_menu_layer_get_selected_index(s_simple_menu_layer)].title);
       break;
     case ACTION_Q:
       text_layer_set_text(s_text_layer, "Stage: Answer");
