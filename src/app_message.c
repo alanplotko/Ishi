@@ -181,6 +181,7 @@ static void s_ease_window_unload(Window *window) {
 static void inbox_received_handler(DictionaryIterator *iterator, void *context) {  
   Window *window = (Window *)context;
   Layer *window_layer = window_get_root_layer(window);
+  GRect bounds = layer_get_frame(window_layer);
   // Get the first pair
   Tuple *t = dict_read_first(iterator);
   // Process all pairs present
@@ -195,7 +196,11 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
       // Question or answer
       case KEY_QUESTION:
       case KEY_ANSWER:
+        // Trim text layer and scroll content to fit text box
         text_layer_set_text(s_question_text_layer, t->value->cstring);
+        GSize max_size = text_layer_get_content_size(s_question_text_layer);
+        text_layer_set_size(s_question_text_layer, max_size);
+        scroll_layer_set_content_size(s_scroll_layer, GSize(bounds.size.w, max_size.h + 4));
 		    layer_mark_dirty(text_layer_get_layer(s_question_text_layer));
         break;
       case KEY_EASE:
