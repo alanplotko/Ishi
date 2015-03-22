@@ -19,6 +19,7 @@
 #define DECK_MENU_SIZE  10
   
 static Window *s_main_window;
+static Window *s_question_window;
 
 static MenuLayer *s_menu_layer;
 static TextLayer *s_text_layer;
@@ -74,17 +75,24 @@ static void sendDeckName(int key, const char *message) {
 }
 
 static void inbox_received_handler(DictionaryIterator *iterator, void *context) {
+  // Get window from context
+  Window *window = (Window *)context;
+  Layer *window_layer = window_get_root_layer(window);
+  
   // Get the first pair
   Tuple *t = dict_read_first(iterator);
   // Process all pairs present
   while(t != NULL) {
     // Process this pair's key
     switch(t->key) {
+      // Build menu
       case KEY_DECKS:
-        // Build menu
-		load_menu_titles(t->value->cstring);
-		layer_mark_dirty(menu_layer_get_layer(s_menu_layer));
-        //build_menu(s_main_window, num_decks);
+		    load_menu_titles(t->value->cstring);
+		    layer_mark_dirty(menu_layer_get_layer(s_menu_layer));
+        break;
+      case KEY_QUESTION:
+        text_layer_set_text(s_text_layer, t->value->cstring);
+        layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
         break;
       default:
         APP_LOG(APP_LOG_LEVEL_INFO, "Unknown key: %d", (int)t->key);
@@ -108,11 +116,29 @@ static void outbox_sent_handler(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
+/******************************* question_window **********************************/
+
+static void question_window_load(Window *window) {
+  // Create text layer with question text
+  Layer *window_layer = window_get_root_layer(window);
+  send(KEY_ACTION, ACTION_Q);
+}
+
+static void question_window_unload(Window *window) {
+  
+}
+
 /********************************* Buttons ************************************/
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   // Use the row to specify which item will receive the select action
   sendDeckName(KEY_DECKS, s_menu_titles[cell_index->row]);
+  s_question_window = window_create();
+  window_set_window_handlers(s_question_window, (WindowHandlers) {
+    .load = question_window_load,
+    .unload = question_window_unload,
+  });
+  window_stack_push(s_question_window, true);
 }
 
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
