@@ -21,6 +21,7 @@
 static Window *s_main_window;
 
 static MenuLayer *s_menu_layer;
+static TextLayer *s_text_layer;
 static char *s_menu_titles[DECK_MENU_SIZE];
 static int num_menu_items = 0;
 static GBitmap *s_menu_icon_image;
@@ -108,6 +109,7 @@ static void outbox_sent_handler(DictionaryIterator *iterator, void *context) {
 }
 
 /********************************* Buttons ************************************/
+
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   // Use the row to specify which item will receive the select action
   sendDeckName(KEY_DECKS, s_menu_titles[cell_index->row]);
@@ -125,9 +127,18 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
 /******************************* main_window **********************************/
 
 static void main_window_load(Window *window) {
-  s_menu_icon_image = gbitmap_create_with_resource(RESOURCE_ID_INDEX_CARD);
-  // Now we prepare to initialize the menu layer
+  // Create text layer with "Loading decks..." message
   Layer *window_layer = window_get_root_layer(window);
+  s_text_layer = text_layer_create(GRect(0, 57, 144, 168));
+  text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_text(s_text_layer, "Loading decks...");
+  text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
+  layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
+  
+  // Index card icon
+  s_menu_icon_image = gbitmap_create_with_resource(RESOURCE_ID_INDEX_CARD);
+  
+  // Now we prepare to initialize the menu layer
   GRect bounds = layer_get_frame(window_layer);
 
   // Create the menu layer
@@ -143,6 +154,9 @@ static void main_window_load(Window *window) {
 
   // Bind the menu layer's click config provider to the window for interactivity
   menu_layer_set_click_config_onto_window(s_menu_layer, window);
+  
+  // Remove "Loading decks..." message
+  layer_remove_child_layers(window_layer);
 
   layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
 	
@@ -152,6 +166,7 @@ static void main_window_load(Window *window) {
 }
 
 static void main_window_unload(Window *window) {
+  text_layer_destroy(s_text_layer);
   gbitmap_destroy(s_menu_icon_image);
   menu_layer_destroy(s_menu_layer);
   destroy_menu_titles();
