@@ -1,19 +1,18 @@
 #include <pebble.h>
 	
 #define KEY_BUTTON    0
-	
 #define KEY_VIBRATE   1
-	
-#define KEY_ACTION     2
-#define ACTION_ANS     0
-#define ACTION_EASE    1
-#define ACTION_Q       2
-#define ACTION_DECK_SELECT    3
+#define KEY_ACTION    2
 
-#define KEY_DECKS 3
-#define KEY_QUESTION 4
-#define KEY_ANSWER 5
-#define KEY_EASE 6
+#define ACTION_ANS    0
+#define ACTION_EASE   1
+#define ACTION_Q      2
+#define ACTION_DECK_SELECT  3
+
+#define KEY_DECKS  3
+#define KEY_QUESTION  4
+#define KEY_ANSWER  5
+#define KEY_EASE  6
 	
 #define NUM_MENU_SECTIONS  1
 #define DECKS  5
@@ -71,28 +70,12 @@ static void build_menu(Window *window, int decks) {
   s_menu_icon_image = gbitmap_create_with_resource(RESOURCE_ID_INDEX_CARD);
 	
   while (num_menu_items < decks) {
-	
     s_first_menu_items[num_menu_items++] = (SimpleMenuItem) {
       .title = s_menu_titles[num_menu_items],
       .callback = menu_select_callback,
       .icon = s_menu_icon_image,
     };
   }
-  /*s_first_menu_items[num_menu_items++] = (SimpleMenuItem) {
-      .title = "CS",
-      .callback = menu_select_callback,
-      .icon = s_menu_icon_image,
-  };
-  s_first_menu_items[num_menu_items++] = (SimpleMenuItem) {
-      .title = "Math",
-      .callback = menu_select_callback,
-      .icon = s_menu_icon_image,
-  };
-  s_first_menu_items[num_menu_items++] = (SimpleMenuItem) {
-      .title = "Physics",
-      .callback = menu_select_callback,
-      .icon = s_menu_icon_image,
-  };*/
   s_menu_sections[0] = (SimpleMenuSection) {
     .num_items = num_menu_items,
     .items = s_first_menu_items,
@@ -113,18 +96,24 @@ static void send(int key, int message) {
   app_message_outbox_send();
 }
 
+static void sendDeckName(int key, const char *message) {
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  dict_write_cstring(iter, key, message);
+  app_message_outbox_send();
+}
+
 static void inbox_received_handler(DictionaryIterator *iterator, void *context) {
   // Get the first pair
   Tuple *t = dict_read_first(iterator);
-
+  int num_decks;
   // Process all pairs present
   while(t != NULL) {
     // Process this pair's key
     switch(t->key) {
       case KEY_DECKS:
         // Build menu
-        text_layer_set_text(s_text_layer, t->value->cstring);
-		int num_decks = load_menu_titles(t->value->cstring);
+		    num_decks = load_menu_titles(t->value->cstring);
         build_menu(s_main_window, num_decks);
         break;
       case KEY_VIBRATE:
@@ -159,6 +148,7 @@ static void outbox_sent_handler(DictionaryIterator *iterator, void *context) {
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   switch(stage) {
     case ACTION_DECK_SELECT:
+      sendDeckName(KEY_DECKS, s_first_menu_items[simple_menu_layer_get_selected_index(s_simple_menu_layer)].title);
       break;
     case ACTION_Q:
       text_layer_set_text(s_text_layer, "Stage: Answer");
