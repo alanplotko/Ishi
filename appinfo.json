@@ -4,15 +4,10 @@
         ""
     ],
     "companyName": "CoRE HackBU Project",
-    "longName": "Ishi",
+    "longName": "Anki",
     "projectType": "native",
     "resources": {
         "media": [
-            {
-                "file": "fonts/Roboto-Regular.ttf",
-                "name": "ROBOTO_24",
-                "type": "font"
-            },
             {
                 "file": "images/index-card.png",
                 "name": "INDEX_CARD",
@@ -21,7 +16,7 @@
         ]
     },
     "sdkVersion": "3",
-    "shortName": "Ishi",
+    "shortName": "Anki",
     "targetPlatforms": [
         "aplite",
         "basalt"
