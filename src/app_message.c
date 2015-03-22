@@ -22,7 +22,7 @@ static Window *s_main_window;
 static Window *s_question_window;
 
 static MenuLayer *s_menu_layer;
-static TextLayer *s_text_layer;
+static TextLayer *s_text_layer, *s_question_text_layer;
 static char *s_menu_titles[DECK_MENU_SIZE];
 static int num_menu_items = 0;
 static GBitmap *s_menu_icon_image;
@@ -91,8 +91,9 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
 		    layer_mark_dirty(menu_layer_get_layer(s_menu_layer));
         break;
       case KEY_QUESTION:
-        text_layer_set_text(s_text_layer, t->value->cstring);
-        layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
+        APP_LOG(APP_LOG_LEVEL_INFO, "%s", t->value->cstring);
+        text_layer_set_text(s_question_text_layer, t->value->cstring);
+        layer_add_child(window_layer, text_layer_get_layer(s_question_text_layer));
         break;
       default:
         APP_LOG(APP_LOG_LEVEL_INFO, "Unknown key: %d", (int)t->key);
@@ -121,6 +122,9 @@ static void outbox_sent_handler(DictionaryIterator *iterator, void *context) {
 static void question_window_load(Window *window) {
   // Create text layer with question text
   Layer *window_layer = window_get_root_layer(window);
+  s_question_text_layer = text_layer_create(GRect(0, 0, 144, 168));
+  text_layer_set_font(s_question_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_text_alignment(s_question_text_layer, GTextAlignmentCenter);  
   send(KEY_ACTION, ACTION_Q);
 }
 
