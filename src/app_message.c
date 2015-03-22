@@ -74,11 +74,7 @@ static void sendDeckName(int key, const char *message) {
   app_message_outbox_send();
 }
 
-static void inbox_received_handler(DictionaryIterator *iterator, void *context) {
-  // Get window from context
-  Window *window = (Window *)context;
-  Layer *window_layer = window_get_root_layer(window);
-  
+static void inbox_received_handler(DictionaryIterator *iterator, void *context) {  
   // Get the first pair
   Tuple *t = dict_read_first(iterator);
   // Process all pairs present
@@ -91,9 +87,9 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
 		    layer_mark_dirty(menu_layer_get_layer(s_menu_layer));
         break;
       case KEY_QUESTION:
-        APP_LOG(APP_LOG_LEVEL_INFO, "%s", t->value->cstring);
+        APP_LOG(APP_LOG_LEVEL_INFO, "Received data: %s", t->value->cstring);
         text_layer_set_text(s_question_text_layer, t->value->cstring);
-        layer_add_child(window_layer, text_layer_get_layer(s_question_text_layer));
+		layer_mark_dirty(text_layer_get_layer(s_question_text_layer));
         break;
       default:
         APP_LOG(APP_LOG_LEVEL_INFO, "Unknown key: %d", (int)t->key);
@@ -120,29 +116,31 @@ static void outbox_sent_handler(DictionaryIterator *iterator, void *context) {
 /******************************* question_window **********************************/
 
 static void question_window_load(Window *window) {
+  send(KEY_ACTION, ACTION_Q);
   // Create text layer with question text
   Layer *window_layer = window_get_root_layer(window);
   s_question_text_layer = text_layer_create(GRect(0, 0, 144, 168));
   text_layer_set_font(s_question_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-  text_layer_set_text_alignment(s_question_text_layer, GTextAlignmentCenter);  
-  send(KEY_ACTION, ACTION_Q);
+  text_layer_set_text(s_question_text_layer, "Loading Question...");
+  text_layer_set_text_alignment(s_question_text_layer, GTextAlignmentCenter); 
+  layer_add_child(window_layer, text_layer_get_layer(s_question_text_layer));
 }
 
 static void question_window_unload(Window *window) {
-  
+  text_layer_destroy(s_question_text_layer);
 }
 
 /********************************* Buttons ************************************/
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   // Use the row to specify which item will receive the select action
-  sendDeckName(KEY_DECKS, s_menu_titles[cell_index->row]);
   s_question_window = window_create();
   window_set_window_handlers(s_question_window, (WindowHandlers) {
     .load = question_window_load,
     .unload = question_window_unload,
   });
   window_stack_push(s_question_window, true);
+  sendDeckName(KEY_DECKS, s_menu_titles[cell_index->row]);
 }
 
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
