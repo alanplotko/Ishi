@@ -80,6 +80,9 @@ static void destroy_menu_titles() {
 /******************************* ease_window ***********************************/
 
 static void ease_menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+   if (cell_index->row == 0) {
+	   send(KEY_EASE, 1);
+   }
    switch(s_ease) {
     case 2:
       if(cell_index->row == 1) {
@@ -105,8 +108,6 @@ static void ease_menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_ind
         send(KEY_EASE, 4);
       } 
       break;
-	  default:
-	   send(KEY_EASE, 0);
    }
    window_stack_pop(true);
 }
@@ -118,7 +119,6 @@ static uint16_t ease_menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t 
 static void ease_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
   if(cell_index->row == 0) {
     menu_cell_basic_draw(ctx, cell_layer, s_ease_menu_titles[0], NULL, NULL);
-    return;
   }
   switch(s_ease) {
     case 2:
