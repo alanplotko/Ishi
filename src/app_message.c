@@ -249,7 +249,7 @@ static void question_window_load(Window *window) {
   scroll_layer_set_content_size(s_scroll_layer, GSize(bounds.size.w, max_size.h + 4));
 
   // Add the layers for display
-  scroll_layer_add_child(s_scroll_layer, text_layer_get_layer(s_text_layer));
+  scroll_layer_add_child(s_scroll_layer, text_layer_get_layer(s_question_text_layer));
   
   layer_add_child(window_layer, scroll_layer_get_layer(s_scroll_layer));
 }
