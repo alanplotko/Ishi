@@ -80,10 +80,6 @@ static void destroy_menu_titles() {
 /******************************* ease_window ***********************************/
 
 static void ease_menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
-   if(cell_index->row == 0) {
-     send(KEY_EASE, 0);
-     return;
-   }
    switch(s_ease) {
     case 2:
       if(cell_index->row == 1) {
@@ -109,7 +105,10 @@ static void ease_menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_ind
         send(KEY_EASE, 4);
       } 
       break;
+	  default:
+	   send(KEY_EASE, 0);
    }
+   window_stack_pop(true);
 }
 
 static uint16_t ease_menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
@@ -194,11 +193,9 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
         break;
       // Question or answer
       case KEY_QUESTION:
-		    layer_remove_child_layers(window_layer);
-		    layer_add_child(window_layer, text_layer_get_layer(s_question_text_layer));
       case KEY_ANSWER:
         text_layer_set_text(s_question_text_layer, t->value->cstring);
-		    layer_mark_dirty(text_layer_get_layer(s_question_text_layer));
+		layer_mark_dirty(text_layer_get_layer(s_question_text_layer));
         break;
       case KEY_EASE:
         s_ease = t->value->uint32;
