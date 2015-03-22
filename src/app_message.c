@@ -31,7 +31,7 @@ static int s_ease;
 static int num_menu_items = 0;
 static GBitmap *s_menu_icon_image;
 
-static GFont roboto;
+//static GFont roboto;
 
 static int s_study_stage = 0;
 
@@ -275,8 +275,8 @@ static void question_window_load(Window *window) {
   
   s_question_text_layer = text_layer_create(max_text_bounds);
   text_layer_set_background_color(s_question_text_layer, GColorClear);
-  roboto = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ROBOTO_21));
-  text_layer_set_font(s_question_text_layer, roboto);
+  //roboto = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ROBOTO_21));
+  text_layer_set_font(s_question_text_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
   text_layer_set_text(s_question_text_layer, "Loading Question...");
   text_layer_set_text_alignment(s_question_text_layer, GTextAlignmentLeft); 
   
@@ -332,8 +332,8 @@ static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   s_text_layer = text_layer_create(GRect(0, 57, 144, 168));
   text_layer_set_background_color(s_text_layer, GColorClear);
-  roboto = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ROBOTO_21));
-  text_layer_set_font(s_text_layer, roboto);
+  //roboto = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ROBOTO_21));
+  text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
   text_layer_set_text(s_text_layer, "Loading decks...");
   text_layer_set_text_alignment(s_text_layer, GTextAlignmentLeft);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
@@ -396,7 +396,7 @@ static void init(void) {
 
 static void deinit(void) {
   // Destroy custom font
-  fonts_unload_custom_font(roboto);
+  //fonts_unload_custom_font(roboto);
   // Destroy main Window
   window_destroy(s_main_window);
 }
