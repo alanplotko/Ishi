@@ -235,15 +235,21 @@ static void question_window_load(Window *window) {
   send(KEY_ACTION, ACTION_Q);
   // Create text layer with question text
   Layer *window_layer = window_get_root_layer(window);
-  s_question_text_layer = text_layer_create(GRect(0, 0, 144, 168));
-  text_layer_set_font(s_question_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-  text_layer_set_text(s_question_text_layer, "Loading Question...");
-  text_layer_set_text_alignment(s_question_text_layer, GTextAlignmentCenter); 
   
   GRect bounds = layer_get_frame(window_layer);
   GRect max_text_bounds = GRect(0, 0, bounds.size.w, 2000);
   s_scroll_layer = scroll_layer_create(bounds);
   
+  // This binds the scroll layer to the window so that up and down map to scrolling
+  // You may use scroll_layer_set_callbacks to add or override interactivity
+  scroll_layer_set_click_config_onto_window(s_scroll_layer, window);
+  
+  s_question_text_layer = text_layer_create(max_text_bounds);
+  text_layer_set_font(s_question_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_text(s_question_text_layer, "Loading Question...");
+  text_layer_set_text_alignment(s_question_text_layer, GTextAlignmentCenter); 
+  
+  // Trim text layer and scroll content to fit text box
   GSize max_size = text_layer_get_content_size(s_question_text_layer);
   text_layer_set_size(s_question_text_layer, max_size);
   scroll_layer_set_content_size(s_scroll_layer, GSize(bounds.size.w, max_size.h + 4));
