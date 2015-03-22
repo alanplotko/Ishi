@@ -27,6 +27,8 @@ static char *s_menu_titles[DECK_MENU_SIZE];
 static int num_menu_items = 0;
 static GBitmap *s_menu_icon_image;
 
+static int s_study_stage = 0;
+
 /******************************* Build menu **********************************/
 
 static void load_menu_titles(char *menu_str) {
@@ -86,10 +88,11 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
 		    load_menu_titles(t->value->cstring);
 		    layer_mark_dirty(menu_layer_get_layer(s_menu_layer));
         break;
+      // Question or answer
       case KEY_QUESTION:
-        APP_LOG(APP_LOG_LEVEL_INFO, "Received data: %s", t->value->cstring);
+      case KEY_ANSWER:
         text_layer_set_text(s_question_text_layer, t->value->cstring);
-		layer_mark_dirty(text_layer_get_layer(s_question_text_layer));
+		    layer_mark_dirty(text_layer_get_layer(s_question_text_layer));
         break;
       default:
         APP_LOG(APP_LOG_LEVEL_INFO, "Unknown key: %d", (int)t->key);
@@ -200,6 +203,29 @@ static void main_window_unload(Window *window) {
   destroy_menu_titles();
 }
 
+void select_single_click_handler(ClickRecognizerRef recognizer, void *context) {
+  Window *window = (Window *)context;
+  switch(s_study_stage) {
+    case 0:
+      send(KEY_ACTION, ACTION_ANS);
+      s_study_stage++;
+      break;
+    case 1:
+      send(KEY_ACTION, ACTION_EASE);
+      s_study_stage++;
+      break;
+    case 2:
+      send(KEY_ACTION, ACTION_Q);
+      s_study_stage = 0;
+      break;
+  }
+}
+
+void config_provider(Window *window) {
+  // Single click select button
+  window_single_click_subscribe(BUTTON_ID_SELECT, select_single_click_handler);
+}
+
 static void init(void) {
   // Register callbacks
   app_message_register_inbox_received(inbox_received_handler);
@@ -209,7 +235,10 @@ static void init(void) {
 
   // Open AppMessage
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
-
+  
+  // Click handlers
+  window_set_click_config_provider(s_question_window, (ClickConfigProvider) config_provider);
+  
   // Create main Window
   s_main_window = window_create();
   window_set_window_handlers(s_main_window, (WindowHandlers) {
