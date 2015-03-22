@@ -181,7 +181,8 @@ static void s_ease_window_unload(Window *window) {
 static void inbox_received_handler(DictionaryIterator *iterator, void *context) {  
   Window *window = (Window *)context;
   Layer *window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_frame(window_layer);
+  GRect bounds;
+  GSize max_size;
   // Get the first pair
   Tuple *t = dict_read_first(iterator);
   // Process all pairs present
@@ -197,11 +198,12 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
       case KEY_QUESTION:
       case KEY_ANSWER:
         // Trim text layer and scroll content to fit text box
+  		//bounds = layer_get_frame(window_layer);
         text_layer_set_text(s_question_text_layer, t->value->cstring);
-        GSize max_size = text_layer_get_content_size(s_question_text_layer);
+        max_size = text_layer_get_content_size(s_question_text_layer);
         text_layer_set_size(s_question_text_layer, max_size);
-        scroll_layer_set_content_size(s_scroll_layer, GSize(bounds.size.w, max_size.h + 4));
-		    layer_mark_dirty(text_layer_get_layer(s_question_text_layer));
+        scroll_layer_set_content_size(s_scroll_layer, text_layer_get_content_size(s_question_text_layer));
+		layer_mark_dirty(text_layer_get_layer(s_question_text_layer));
         break;
       case KEY_EASE:
         s_ease = t->value->uint32;
@@ -235,6 +237,22 @@ static void outbox_sent_handler(DictionaryIterator *iterator, void *context) {
 }
 
 /******************************* question_window **********************************/
+void select_single_click_handler(ClickRecognizerRef recognizer, void *context) {
+  switch(s_study_stage) {
+    case 0:
+      send(KEY_ACTION, ACTION_ANS);
+      s_study_stage++;
+      break;
+    case 1:
+      send(KEY_ACTION, ACTION_EASE);
+      s_study_stage = 0;
+      break;
+  }
+}
+void config_provider(Window *window) {
+  // Single click select button
+  window_single_click_subscribe(BUTTON_ID_SELECT, select_single_click_handler);
+}
 
 static void question_window_load(Window *window) {
   send(KEY_ACTION, ACTION_Q);
@@ -242,8 +260,12 @@ static void question_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   
   GRect bounds = layer_get_frame(window_layer);
-  GRect max_text_bounds = GRect(0, 0, bounds.size.w, 2000);
+  GRect max_text_bounds = GRect(0, 0, 144, 2000);
   s_scroll_layer = scroll_layer_create(bounds);
+	
+  scroll_layer_set_callbacks(s_scroll_layer, (ScrollLayerCallbacks) {
+	  .click_config_provider = (ClickConfigProvider) config_provider
+  });
   
   // This binds the scroll layer to the window so that up and down map to scrolling
   // You may use scroll_layer_set_callbacks to add or override interactivity
@@ -257,7 +279,7 @@ static void question_window_load(Window *window) {
   // Trim text layer and scroll content to fit text box
   GSize max_size = text_layer_get_content_size(s_question_text_layer);
   text_layer_set_size(s_question_text_layer, max_size);
-  scroll_layer_set_content_size(s_scroll_layer, GSize(bounds.size.w, max_size.h + 4));
+  scroll_layer_set_content_size(s_scroll_layer, GSize(152, max_size.h + 16));
 
   // Add the layers for display
   scroll_layer_add_child(s_scroll_layer, text_layer_get_layer(s_question_text_layer));
@@ -272,30 +294,16 @@ static void question_window_unload(Window *window) {
 
 /********************************* Buttons ************************************/
 
-void select_single_click_handler(ClickRecognizerRef recognizer, void *context) {
-  switch(s_study_stage) {
-    case 0:
-      send(KEY_ACTION, ACTION_ANS);
-      s_study_stage++;
-      break;
-    case 1:
-      send(KEY_ACTION, ACTION_EASE);
-      s_study_stage = 0;
-      break;
-  }
-}
 
-void config_provider(Window *window) {
-  // Single click select button
-  window_single_click_subscribe(BUTTON_ID_SELECT, select_single_click_handler);
-}
+
+
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   // Use the row to specify which item will receive the select action
   s_question_window = window_create();
   s_study_stage = 0;
   // Click handlers
-  window_set_click_config_provider(s_question_window, (ClickConfigProvider) config_provider);
+  //window_set_click_config_provider(s_question_window, (ClickConfigProvider) config_provider);
   window_set_window_handlers(s_question_window, (WindowHandlers) {
     .load = question_window_load,
     .unload = question_window_unload,
