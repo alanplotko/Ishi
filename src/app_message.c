@@ -24,6 +24,7 @@ static Window *s_ease_window;
 
 static MenuLayer *s_menu_layer, *s_ease_menu_layer;
 static TextLayer *s_text_layer, *s_question_text_layer;
+static ScrollLayer *s_scroll_layer;
 static char *s_menu_titles[DECK_MENU_SIZE];
 static const char *s_ease_menu_titles[] = {"Again", "Hard", "Good", "Easy"};
 static int s_ease;
@@ -195,7 +196,7 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
       case KEY_QUESTION:
       case KEY_ANSWER:
         text_layer_set_text(s_question_text_layer, t->value->cstring);
-		layer_mark_dirty(text_layer_get_layer(s_question_text_layer));
+		    layer_mark_dirty(text_layer_get_layer(s_question_text_layer));
         break;
       case KEY_EASE:
         s_ease = t->value->uint32;
@@ -238,11 +239,24 @@ static void question_window_load(Window *window) {
   text_layer_set_font(s_question_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   text_layer_set_text(s_question_text_layer, "Loading Question...");
   text_layer_set_text_alignment(s_question_text_layer, GTextAlignmentCenter); 
-  layer_add_child(window_layer, text_layer_get_layer(s_question_text_layer));
+  
+  GRect bounds = layer_get_frame(window_layer);
+  GRect max_text_bounds = GRect(0, 0, bounds.size.w, 2000);
+  s_scroll_layer = scroll_layer_create(bounds);
+  
+  GSize max_size = text_layer_get_content_size(s_question_text_layer);
+  text_layer_set_size(s_question_text_layer, max_size);
+  scroll_layer_set_content_size(s_scroll_layer, GSize(bounds.size.w, max_size.h + 4));
+
+  // Add the layers for display
+  scroll_layer_add_child(s_scroll_layer, text_layer_get_layer(s_text_layer));
+  
+  layer_add_child(window_layer, scroll_layer_get_layer(s_scroll_layer));
 }
 
 static void question_window_unload(Window *window) {
   text_layer_destroy(s_question_text_layer);
+  scroll_layer_destroy(s_scroll_layer);
 }
 
 /********************************* Buttons ************************************/
