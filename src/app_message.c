@@ -79,6 +79,8 @@ static void sendDeckName(int key, const char *message) {
 }
 
 static void inbox_received_handler(DictionaryIterator *iterator, void *context) {  
+  Window *window = (Window *)context;
+  Layer *window_layer = window_get_root_layer(window);
   // Get the first pair
   Tuple *t = dict_read_first(iterator);
   // Process all pairs present
@@ -92,12 +94,16 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
         break;
       // Question or answer
       case KEY_QUESTION:
+		layer_remove_child_layers(window_layer);
+		layer_add_child(window_layer, text_layer_get_layer(s_question_text_layer));
       case KEY_ANSWER:
         text_layer_set_text(s_question_text_layer, t->value->cstring);
-		    layer_mark_dirty(text_layer_get_layer(s_question_text_layer));
+		layer_mark_dirty(text_layer_get_layer(s_question_text_layer));
         break;
       case KEY_EASE:
         s_ease = t->value->uint32;
+		layer_remove_child_layers(window_layer);
+		layer_add_child(window_layer, menu_layer_get_layer(s_ease_menu_layer));
         layer_mark_dirty(menu_layer_get_layer(s_ease_menu_layer));
         break;
       default:
