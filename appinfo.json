@@ -9,6 +9,11 @@
     "resources": {
         "media": [
             {
+                "file": "fonts/Roboto-Regular.ttf",
+                "name": "ROBOTO_24",
+                "type": "font"
+            },
+            {
                 "file": "images/index-card.png",
                 "name": "INDEX_CARD",
                 "type": "png"

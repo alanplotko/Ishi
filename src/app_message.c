@@ -235,7 +235,7 @@ static void question_window_load(Window *window) {
   // Create text layer with question text
   Layer *window_layer = window_get_root_layer(window);
   s_question_text_layer = text_layer_create(GRect(0, 0, 144, 168));
-  text_layer_set_font(s_question_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_font(s_question_text_layer, fonts_load_custom_font(FONT_KEY_ROBOTO_24));
   text_layer_set_text(s_question_text_layer, "Loading Question...");
   text_layer_set_text_alignment(s_question_text_layer, GTextAlignmentCenter); 
   layer_add_child(window_layer, text_layer_get_layer(s_question_text_layer));
@@ -298,7 +298,7 @@ static void main_window_load(Window *window) {
   // Create text layer with "Loading decks..." message
   Layer *window_layer = window_get_root_layer(window);
   s_text_layer = text_layer_create(GRect(0, 57, 144, 168));
-  text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_font(s_text_layer, fonts_load_custom_font(FONT_KEY_ROBOTO_24));
   text_layer_set_text(s_text_layer, "Loading decks...");
   text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
