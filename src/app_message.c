@@ -31,6 +31,8 @@ static int s_ease;
 static int num_menu_items = 0;
 static GBitmap *s_menu_icon_image;
 
+static GFont roboto;
+
 static int s_study_stage = 0;
 
 static void send(int key, int message) {
@@ -260,7 +262,7 @@ static void question_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   
   GRect bounds = layer_get_frame(window_layer);
-  GRect max_text_bounds = GRect(0, 0, 144, 2000);
+  GRect max_text_bounds = GRect(5, 0, 144, 2000);
   s_scroll_layer = scroll_layer_create(bounds);
 	
   scroll_layer_set_callbacks(s_scroll_layer, (ScrollLayerCallbacks) {
@@ -272,9 +274,11 @@ static void question_window_load(Window *window) {
   scroll_layer_set_click_config_onto_window(s_scroll_layer, window);
   
   s_question_text_layer = text_layer_create(max_text_bounds);
-  text_layer_set_font(s_question_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_background_color(s_question_text_layer, GColorClear);
+  roboto = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ROBOTO_21));
+  text_layer_set_font(s_question_text_layer, roboto);
   text_layer_set_text(s_question_text_layer, "Loading Question...");
-  text_layer_set_text_alignment(s_question_text_layer, GTextAlignmentCenter); 
+  text_layer_set_text_alignment(s_question_text_layer, GTextAlignmentLeft); 
   
   // Trim text layer and scroll content to fit text box
   GSize max_size = text_layer_get_content_size(s_question_text_layer);
@@ -327,9 +331,11 @@ static void main_window_load(Window *window) {
   // Create text layer with "Loading decks..." message
   Layer *window_layer = window_get_root_layer(window);
   s_text_layer = text_layer_create(GRect(0, 57, 144, 168));
-  text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_background_color(s_text_layer, GColorClear);
+  roboto = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ROBOTO_21));
+  text_layer_set_font(s_text_layer, roboto);
   text_layer_set_text(s_text_layer, "Loading decks...");
-  text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
+  text_layer_set_text_alignment(s_text_layer, GTextAlignmentLeft);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
   
   // Index card icon
@@ -389,6 +395,8 @@ static void init(void) {
 }
 
 static void deinit(void) {
+  // Destroy custom font
+  fonts_unload_custom_font(roboto);
   // Destroy main Window
   window_destroy(s_main_window);
 }
