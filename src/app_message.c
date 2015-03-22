@@ -82,6 +82,7 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
       case KEY_DECKS:
         // Build menu
 		load_menu_titles(t->value->cstring);
+		layer_mark_dirty(menu_layer_get_layer(s_menu_layer));
         //build_menu(s_main_window, num_decks);
         break;
       default:
