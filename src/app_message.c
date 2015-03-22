@@ -94,17 +94,15 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
         break;
       // Question or answer
       case KEY_QUESTION:
-		layer_remove_child_layers(window_layer);
-		layer_add_child(window_layer, text_layer_get_layer(s_question_text_layer));
       case KEY_ANSWER:
         text_layer_set_text(s_question_text_layer, t->value->cstring);
 		layer_mark_dirty(text_layer_get_layer(s_question_text_layer));
         break;
       case KEY_EASE:
         s_ease = t->value->uint32;
-		layer_remove_child_layers(window_layer);
 		layer_add_child(window_layer, menu_layer_get_layer(s_ease_menu_layer));
-        layer_mark_dirty(menu_layer_get_layer(s_ease_menu_layer));
+		menu_layer_set_click_config_onto_window(s_ease_menu_layer, window);
+        //layer_mark_dirty(menu_layer_get_layer(s_ease_menu_layer));
         break;
       default:
         APP_LOG(APP_LOG_LEVEL_INFO, "Unknown key: %d", (int)t->key);
@@ -126,6 +124,24 @@ static void outbox_failed_handler(DictionaryIterator *iterator, AppMessageResult
 
 static void outbox_sent_handler(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
+}
+
+void select_single_click_handler(ClickRecognizerRef recognizer, void *context) {
+  switch(s_study_stage) {
+    case 0:
+      send(KEY_ACTION, ACTION_ANS);
+      s_study_stage++;
+      break;
+    case 1:
+      send(KEY_ACTION, ACTION_EASE);
+      s_study_stage = 0;
+      break;
+  }
+}
+
+void config_provider(Window *window) {
+  // Single click select button
+  window_single_click_subscribe(BUTTON_ID_SELECT, select_single_click_handler);
 }
 
 /******************************* question_window **********************************/
@@ -161,6 +177,8 @@ static void ease_menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_ind
       } 
       break;
    }
+   layer_remove_from_parent(menu_layer_get_layer(s_ease_menu_layer));
+   window_set_click_config_provider(s_question_window, (ClickConfigProvider) config_provider);
 }
 
 static uint16_t ease_menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
@@ -202,7 +220,7 @@ static void ease_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
 }
 
 static void question_window_load(Window *window) {
-  send(KEY_ACTION, ACTION_Q);
+  //send(KEY_ACTION, ACTION_Q);
   // Create text layer with question text
   Layer *window_layer = window_get_root_layer(window);
   s_question_text_layer = text_layer_create(GRect(0, 0, 144, 168));
@@ -226,7 +244,7 @@ static void question_window_load(Window *window) {
   });
 
   // Bind the menu layer's click config provider to the window for interactivity
-  menu_layer_set_click_config_onto_window(s_ease_menu_layer, window);
+  //menu_layer_set_click_config_onto_window(s_ease_menu_layer, window);
 }
 
 static void question_window_unload(Window *window) {
@@ -235,27 +253,7 @@ static void question_window_unload(Window *window) {
 
 /********************************* Buttons ************************************/
 
-void select_single_click_handler(ClickRecognizerRef recognizer, void *context) {
-  switch(s_study_stage) {
-    case 0:
-      send(KEY_ACTION, ACTION_ANS);
-      s_study_stage++;
-      break;
-    case 1:
-      send(KEY_ACTION, ACTION_EASE);
-      s_study_stage++;
-      break;
-    case 2:
-      send(KEY_ACTION, ACTION_Q);
-      s_study_stage = 0;
-      break;
-  }
-}
 
-void config_provider(Window *window) {
-  // Single click select button
-  window_single_click_subscribe(BUTTON_ID_SELECT, select_single_click_handler);
-}
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   // Use the row to specify which item will receive the select action
