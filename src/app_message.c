@@ -21,9 +21,11 @@
 static Window *s_main_window;
 static Window *s_question_window;
 
-static MenuLayer *s_menu_layer;
+static MenuLayer *s_menu_layer, *s_ease_menu_layer;
 static TextLayer *s_text_layer, *s_question_text_layer;
 static char *s_menu_titles[DECK_MENU_SIZE];
+static const char *s_ease_menu_titles[] = {"Again", "Hard", "Good", "Easy"};
+static int s_ease;
 static int num_menu_items = 0;
 static GBitmap *s_menu_icon_image;
 
@@ -94,6 +96,10 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
         text_layer_set_text(s_question_text_layer, t->value->cstring);
 		    layer_mark_dirty(text_layer_get_layer(s_question_text_layer));
         break;
+      case KEY_EASE:
+        s_ease = t->value->uint32;
+        layer_mark_dirty(menu_layer_get_layer(s_ease_menu_layer));
+        break;
       default:
         APP_LOG(APP_LOG_LEVEL_INFO, "Unknown key: %d", (int)t->key);
         break;
@@ -118,6 +124,77 @@ static void outbox_sent_handler(DictionaryIterator *iterator, void *context) {
 
 /******************************* question_window **********************************/
 
+static void ease_menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+   if (cell_index->row == 0){
+     send(KEY_EASE, 0);
+     return;
+   }
+   switch(s_ease) {
+    case 2:
+      if(cell_index->row == 1) {
+        send(KEY_EASE, 3);
+      }
+      break;
+    case 3:
+      if(cell_index->row == 1) {
+        send(KEY_EASE, 3);
+      }
+      else if(cell_index->row == 2) {
+        send(KEY_EASE, 4);
+      }
+      break;
+    case 4:
+      if(cell_index->row == 1) {
+        send(KEY_EASE, 2);
+      }
+      else if(cell_index->row == 2) {
+        send(KEY_EASE, 3);
+      } 
+      else if(cell_index->row == 3) {
+        send(KEY_EASE, 4);
+      } 
+      break;
+   }
+}
+
+static uint16_t ease_menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
+   return s_ease;
+}
+
+static void ease_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
+  if(cell_index->row == 0) {
+    menu_cell_basic_draw(ctx, cell_layer, s_ease_menu_titles[0], NULL, NULL);
+    return;
+  }
+  switch(s_ease) {
+    case 2:
+      if(cell_index->row == 1) {
+        menu_cell_basic_draw(ctx, cell_layer, s_ease_menu_titles[2], NULL, NULL);
+      }
+      break;
+    case 3:
+      if(cell_index->row == 1) {
+        menu_cell_basic_draw(ctx, cell_layer, s_ease_menu_titles[2], NULL, NULL);
+      }
+      else if(cell_index->row == 2) {
+        menu_cell_basic_draw(ctx, cell_layer, s_ease_menu_titles[3], NULL, NULL);
+      }
+      break;
+    case 4:
+      if(cell_index->row == 1) {
+        menu_cell_basic_draw(ctx, cell_layer, s_ease_menu_titles[1], NULL, NULL);
+      }
+      else if(cell_index->row == 2) {
+        menu_cell_basic_draw(ctx, cell_layer, s_ease_menu_titles[2], NULL, NULL);
+      } 
+      else if(cell_index->row == 3) {
+        menu_cell_basic_draw(ctx, cell_layer, s_ease_menu_titles[3], NULL, NULL);
+      } 
+      break;
+  }
+  menu_layer_reload_data(s_ease_menu_layer);
+}
+
 static void question_window_load(Window *window) {
   send(KEY_ACTION, ACTION_Q);
   // Create text layer with question text
@@ -127,6 +204,23 @@ static void question_window_load(Window *window) {
   text_layer_set_text(s_question_text_layer, "Loading Question...");
   text_layer_set_text_alignment(s_question_text_layer, GTextAlignmentCenter); 
   layer_add_child(window_layer, text_layer_get_layer(s_question_text_layer));
+  
+  // Now we prepare to initialize the menu layer
+  GRect bounds = layer_get_frame(window_layer);
+  
+  // Create the menu layer
+  s_ease_menu_layer = menu_layer_create(bounds);
+  menu_layer_set_callbacks(s_ease_menu_layer, NULL, (MenuLayerCallbacks){
+    //*.get_num_sections = menu_get_num_sections_callback,
+    .get_num_rows = ease_menu_get_num_rows_callback,
+    //*.get_header_height = menu_get_header_height_callback,
+    //*.draw_header = menu_draw_header_callback,
+    .draw_row = ease_menu_draw_row_callback,
+    .select_click = ease_menu_select_callback,
+  });
+
+  // Bind the menu layer's click config provider to the window for interactivity
+  menu_layer_set_click_config_onto_window(s_ease_menu_layer, window);
 }
 
 static void question_window_unload(Window *window) {
@@ -136,7 +230,6 @@ static void question_window_unload(Window *window) {
 /********************************* Buttons ************************************/
 
 void select_single_click_handler(ClickRecognizerRef recognizer, void *context) {
-  Window *window = (Window *)context;
   switch(s_study_stage) {
     case 0:
       send(KEY_ACTION, ACTION_ANS);
