@@ -14,9 +14,9 @@
 #define KEY_EASE            6
 
 // Define number of sections, decks, and menu items
-#define NUM_MENU_SECTIONS  1
-#define DECKS  5
-#define DECK_MENU_SIZE  10
+#define NUM_MENU_SECTIONS   1
+#define DECKS               5
+#define DECK_MENU_SIZE      10
 
 // Pebble app window setup
 static Window *s_main_window;
