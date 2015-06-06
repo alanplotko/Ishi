@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/alanplotko/Ishi](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/alanplotko/Ishi?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Anki is a flashcard app that is trained by your successes and failures to quiz you in the right way to maximize your results. We've created Ishi, an integration of Anki with the Pebble, so that you can study on the go without ever needing to handle your phone. Ishi was built at HackBU, a hackathon hosted at Binghamton University. You can view the ChallengePost project [here](http://challengepost.com/software/ishi).
+Ishi is an integration of Anki with the Pebble, so that you can study on the go without ever needing to handle your phone. Anki is a flashcard app that is trained by your successes and failures to quiz you in the right way to maximize your results. Ishi was built at HackBU, a hackathon hosted at Binghamton University. You can view the ChallengePost project [here](http://challengepost.com/software/ishi).
 
 ## How Ishi Works
 
